@@ -88,10 +88,10 @@ main()
 		entropy_input[i] = i;
 	randombytes_init(entropy_input, NULL, 256);
 
-	LARGE_INTEGER fre = { 0 };//´¢´æ±¾»úCPUÊ±ÖÓÆµÂÊ
+	LARGE_INTEGER fre = { 0 };//å‚¨å­˜æœ¬æœºCPUæ—¶é’Ÿé¢‘ç‡
 	LARGE_INTEGER startCount = { 0 };
 	LARGE_INTEGER endCount = { 0 };
-	QueryPerformanceFrequency(&fre);//»ñÈ¡±¾»úcpuÆµÂÊ
+	QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
 	clock_t begin, end;
 	double ttkeypair = 0, ttenc = 0, ttdec = 0, ttmul=0;
 	int iter = 100;
@@ -101,9 +101,9 @@ main()
 		// Generate the public/private keypair
 		
 		randombytes(rm_seed, NTRU_SAMPLE_RM_BYTES);
-		QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+		QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
 		keypair(&f, &invf_mod3, &h, rm_seed);
-		QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
+		QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
 		ttkeypair += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 
 
@@ -111,23 +111,22 @@ main()
 		sample_rm(&r, &m, rm_seed);
 		//prt(&m);
 
-		QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+		QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
 		poly_Rq_mul(&cf, &c, &h);
-		QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
+		QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
 		ttmul += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 
 		//enc
-		QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+		QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
 		enc(&c, &r, &m, &h);
-		QueryPerformanceCounter(&endCount);;//¼ÆÊ±½áÊø
+		QueryPerformanceCounter(&endCount);;//è®¡æ—¶ç»“æŸ
 		ttenc += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 		//  prt(&c);
-		//  poly_trinary_Zq_to_Z3(&m);
-
+		
 		 //dec
-		QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+		QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
 		dec(&mm, &c, &f, &invf_mod3);
-		QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
+		QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
 		ttdec += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 		//  prt(&mm);
 	}
