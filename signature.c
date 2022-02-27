@@ -55,19 +55,16 @@ main()
 		QueryPerformanceCounter(&startCount);//计时开始
 		ret_val = crypto_sign_keypair(pk, sk);
 		QueryPerformanceCounter(&endCount);//计时结束
-		//QueryPerformanceFrequency(&fre);
 		ttkeypair += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 
 		QueryPerformanceCounter(&startCount);//计时开始
 		ret_val = crypto_sign(sm, &smlen, m, mlen, sk);
 		QueryPerformanceCounter(&endCount);//计时结束
-		//QueryPerformanceFrequency(&fre);
 		ttsign += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 
 		QueryPerformanceCounter(&startCount);//计时开始
 		ret_val = crypto_sign_open(m1, &mlen1, sm, smlen, pk);
 		QueryPerformanceCounter(&endCount);//计时结束
-		//QueryPerformanceFrequency(&fre);
 		ttopen += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 	}
 	free(m);
