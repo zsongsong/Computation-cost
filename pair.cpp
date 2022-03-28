@@ -14,20 +14,20 @@ extern "C"
 #include <stdio.h>
 }
 
-int main_pair() {
+int main() {
     int k = 100;
-    double dTimeTake1=0, dTimeTake2=0, dTimeTake3=0;
-    LARGE_INTEGER fre = { 0 };//´¢´æ±¾»úCPUÊ±ÖÓÆµÂÊ
+    double dTimeTake1=0, dTimeTake2=0, dTimeTake3=0, dTimeTake4 = 0, dTimeTake5 = 0;
+    LARGE_INTEGER fre = { 0 };//å‚¨å­˜æœ¬æœºCPUæ—¶é’Ÿé¢‘ç‡
     LARGE_INTEGER startCount = { 0 };
     LARGE_INTEGER endCount = { 0 };
-    QueryPerformanceFrequency(&fre);//»ñÈ¡±¾»úcpuÆµÂÊ
-	miracl* mip = mirsys(1, 0); //³õÊ¼»¯miraclÏµÍ³
+    QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
+	miracl* mip = mirsys(1, 0); //åˆå§‹åŒ–miraclç³»ç»Ÿ
     mip->IOBASE = 16;
-    PFC pfc(80);//big n = mirvar(8); //³õÊ¼»¯n,±ØĞëÓĞ
-    Big a;//¶¨ÒåÒ»¸öBigÀàĞÍ±äÁ¿£¬Ä¬ÈÏ³õÊ¼»¯Îª0
+    PFC pfc(80);//big n = mirvar(8); //åˆå§‹åŒ–n,å¿…é¡»æœ‰
+    Big a;//å®šä¹‰ä¸€ä¸ªBigç±»å‹å˜é‡ï¼Œé»˜è®¤åˆå§‹åŒ–ä¸º0
     big aa;
-    G1 P, Q;//³Ë·¨
-    G1 P1, Q1;//Åä¶Ô
+    G1 P, Q;//ä¹˜æ³•
+    G1 P1, Q1;//é…å¯¹
     GT ZT;
     aa = mirvar(0);
     for (int i = 0; i < k; i++) {
@@ -37,32 +37,47 @@ int main_pair() {
         pfc.random(P);
         pfc.random(Q);
         //pfc.precomp_for_mult(P);
-        QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+        QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
         Q = pfc.mult(P, a); //Q=aP
-        QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
-        QueryPerformanceFrequency(&fre);//»ñÈ¡±¾»úcpuÆµÂÊ
+        QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
+        QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
         dTimeTake1 += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
+
 
         pfc.random(P1);
         pfc.random(Q1);
         //pfc.precomp_for_pairing(P1);
         //pfc.precomp_for_pairing(Q1);
-        QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+        QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
         ZT = pfc.pairing(P1, Q1); //Z=e(P,Q);
-        QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
-        QueryPerformanceFrequency(&fre);//»ñÈ¡±¾»úcpuÆµÂÊ
+        QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
+        QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
         dTimeTake2 += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
 
-        QueryPerformanceCounter(&startCount);//¼ÆÊ±¿ªÊ¼
+        QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
         pfc.hash_and_map(P1, (char*)"Robert");
-        QueryPerformanceCounter(&endCount);//¼ÆÊ±½áÊø
-        QueryPerformanceFrequency(&fre);//»ñÈ¡±¾»úcpuÆµÂÊ
+        QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
+        QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
         dTimeTake3 += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
+
+        QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
+        pfc.power(ZT,a);
+        QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
+        QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
+        dTimeTake4 += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
+
+        QueryPerformanceCounter(&startCount);//è®¡æ—¶å¼€å§‹
+        P1 = P + Q;
+        QueryPerformanceCounter(&endCount);//è®¡æ—¶ç»“æŸ
+        QueryPerformanceFrequency(&fre);//è·å–æœ¬æœºcpué¢‘ç‡
+        dTimeTake5 += ((double)endCount.QuadPart - (double)startCount.QuadPart) / (double)fre.QuadPart;
+
     }
 
-    printf("mult %f ms£¡\n", dTimeTake1 * 1000 / k);
-    printf("pairing %f ms£¡\n", dTimeTake2 * 1000/k);
-    printf("hash_and_map %f ms£¡\n", dTimeTake3 * 1000/k);
-
+    printf("mult %f msï¼\n", dTimeTake1 * 1000 / k);
+    printf("pairing %f msï¼\n", dTimeTake2 * 1000/k);
+    printf("hash_and_map %f msï¼\n", dTimeTake3 * 1000/k);
+    printf("power %f msï¼\n", dTimeTake4 * 1000 / k);
+    printf("add %f msï¼\n", dTimeTake5 * 1000 / k);
 	return 0;
 }
