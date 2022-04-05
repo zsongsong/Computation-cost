@@ -1,0 +1,95 @@
+type IDta.
+type skey.
+type pkey.
+fun pk(skey): pkey.
+fun aenc(bitstring, bitstring,bitstring,
+bitstring,pkey): bitstring.
+reduc forall m1: bitstring,m2: bitstring,
+m3: bitstring,m4: bitstring, sk: skey;
+adec(aenc(m1,m2,m3,m4,pk(sk)),sk)
+= (m1,m2,m3,m4).
+free sc1: channel  [private].
+free sc2: channel  [private].
+free sc3: channel  [private].
+free c1: channel.
+free c2: channel.
+free Sv:bitstring [private].
+free Sd:bitstring [private].
+free Sr:bitstring [private].
+free IDv:bitstring [private].
+free IDd:bitstring [private].
+free IDr:bitstring [private].
+fun H0(bitstring):bitstring [private].
+fun H1(bitstring):bitstring.
+fun con(bitstring,bitstring):bitstring.
+fun min(bitstring,bitstring,bitstring,
+bitstring):bitstring.
+table rsutab(IDta,pkey,bitstring).
+table listh(bitstring,bitstring).
+query attacker(IDr).
+query attacker(IDd).
+query attacker(IDv).
+	let RSU=
+	!(
+	out(sc3,(IDr)); 
+	in(sc3,(rPWr:bitstring,rTAid:
+	IDta,rpkA:pkey));
+	insert rsutab(rTAid,rpkA,rPWr);
+	new tr:bitstring;
+	in(c1,(red:bitstring,rev:bitstring,
+	rdTAid:IDta,rh:bitstring));
+	get rsutab(=rdTAid,rdpkA,rdPWr) in
+	let rer = aenc(IDr,rdPWr,tr,rh,rdpkA) in
+	if rh = H1(con(red,rev)) then 
+	let ff = (red,rev,rer) in
+	out(c2,ff);
+	0).
+	let OBU= 
+	out(sc1,(IDd)); 
+	in(sc1, (dPWd:bitstring,dTAid:IDta,dpkA:pkey));
+	out(sc2,(IDv)); 
+	in(sc2,(vPWv:bitstring,vTAid:
+	IDta,vpkA:pkey));
+	if dTAid = vTAid then
+	!(
+	new keydv:bitstring; 
+	new td:bitstring; 
+	new tv:bitstring;
+	let ed = aenc(IDd,dPWd,td,keydv,dpkA) in
+	let ev = aenc(IDv,vPWv,tv,keydv,vpkA) in
+	let dh = H1(con(ed,ev)) in
+	let f = (ed,ev,dTAid,dh) in 	out(c1,f);
+	0).
+	let TA=
+	new threshold:bitstring; 
+	new TAid:IDta; new TA_sk:skey;
+	!(
+	let TA_pk = pk(TA_sk) in
+	let pub = (TAid,TA_pk) in out(c1,pub);out(c2,pub);
+	in(sc1,(idd:bitstring));
+	let PWd = H0(con(Sd,idd)) in
+	let dpub = (PWd,TAid,TA_pk) in out(sc1,dpub);
+	in(sc2,(idv:bitstring));
+	let PWv = H0(con(Sv,idv)) in
+	let vpub = (PWv,TAid,TA_pk) in out(sc2,vpub);
+	in(sc3,(idr:bitstring));
+	let PWr = H0(con(Sr,idr)) in
+	let rpub = (PWr,TAid,TA_pk) in out(sc3,rpub);
+	in(c2,(ed:bitstring,ev:bitstring,er:bitstring));
+	let (id_d:bitstring,pwd:bitstring,
+	td:bitstring,key1:bitstring) = 	adec(ed,TA_sk) in
+	let (id_v:bitstring,pwv:bitstring,
+	tv:bitstring,key2:bitstring) = 	adec(ev,TA_sk) in
+	let (id_r:bitstring,pwr:bitstring,
+	tr:bitstring,h:bitstring) = adec(er,TA_sk) in
+	let t = min(td,tv,tr,threshold) in
+	if key1 = key2 then
+	if h = H1(con(ed,ev)) then
+	get listh(t1,=h) in 0 else
+	if pwd = H0(con(Sd,id_d)) then 
+	if pwv = H0(con(Sv,id_v)) then
+	if pwr = H0(con(Sr,id_r)) then 
+	insert listh(t,h);
+	0).
+process
+	!OBU|!RSU|!TA
